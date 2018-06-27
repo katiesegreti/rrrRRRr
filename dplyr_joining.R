@@ -1,3 +1,42 @@
+## Mutating joins: left and right, inner and outer
+
+#inner_join() only records that appear in both datasets, least inclusive
+# full_join() most inclusive, retains any row that appears in any dataset
+
+# Join albums to songs using inner_join()
+inner_join(songs, albums, by = "album")
+
+# Join bands to artists using full_join()
+full_join(artists, bands, by = c("first", "last"))
+
+# Find guitarists in bands dataset (don't change)
+temp <- left_join(bands, artists, by = c("first", "last"))
+temp <- filter(temp, instrument == "Guitar")
+select(temp, first, last, band)
+
+# Reproduce code above using pipes
+bands %>% 
+  left_join(artists, by = c("first", "last")) %>%
+  filter(instrument == "Guitar") %>%
+  select(first, last, band)
+
+## filtering joins
+# semi_join()
+# semi-joins provide a concise way to filter data from 
+#the first dataset based on information in a second dataset.
+
+#anti_join() returns rows that don't have a match in the RHS
+# you can use an anti-join to see which rows will not be 
+# matched to a second dataset by a join.
+
+# Return rows of artists that don't have bands info
+artists %>% 
+  anti_join(bands, by = c("first", "last"))
+
+
+# set operations
+## union() intersect() setdiff()
+
 # Examine hank_years and hank_charts
 hank_years
 hank_charts
@@ -47,7 +86,7 @@ stage_songs %>%
   # Left join stage_writers to stage_songs
   left_join(stage_writers, by = "song")
 library(dplyr)
-?rename
+?ungroup
 
 
 movie_years %>% 
@@ -147,4 +186,86 @@ players %>%
   summarize(total_at_bat = sum(AB, na.rm = TRUE)) %>% 
   # Arrange in descending order
   arrange(desc(total_at_bat))
+
+##Last part
+
+# Find the distinct players that appear in HallOfFame
+nominated <- HallOfFame %>% 
+  distinct(playerID) 
+
+nominated %>% 
+  # Count the number of players in nominated
+  count()
+
+nominated_full <- nominated %>% 
+  # Join to Master
+  left_join(Master, by = "playerID") %>% 
+  # Return playerID, nameFirst, nameLast
+  select(playerID, nameFirst, nameLast)
+
+# Find distinct players in HallOfFame with inducted == "Y"
+inducted <- HallOfFame %>% 
+  filter(inducted == "Y") %>%
+  distinct(playerID) 
+
+inducted %>% 
+  # Count the number of players in inducted
+  count()
+
+inducted_full <- inducted %>% 
+  # Join to Master
+  left_join(Master, by = "playerID") %>% 
+  # Return playerID, nameFirst, nameLast
+  select(playerID, nameFirst, nameLast)
+
+# Tally the number of awards in AwardsPlayers by playerID
+nAwards <- AwardsPlayers %>% 
+  group_by(playerID) %>% 
+  tally()
+
+nAwards %>% 
+  # Filter to just the players in inducted 
+  semi_join(inducted, by = "playerID") %>% 
+  # Calculate the mean number of awards per player
+  summarize(avg_n = mean(n, na.rm = TRUE))
+
+nAwards %>% 
+  # Filter to just the players in nominated 
+  semi_join(nominated, by = "playerID") %>% 
+  # Filter to players NOT in inducted 
+  anti_join(inducted, by = "playerID") %>% 
+  # Calculate the mean number of awards per player
+  summarize(avg_n = mean(n, na.rm = TRUE))
+
+
+# Find the players who are in nominated, but not inducted
+notInducted <- nominated %>% 
+  setdiff(inducted)
+
+Salaries %>% 
+  # Find the players who are in notInducted
+  semi_join(notInducted, by = "playerID") %>% 
+  # Calculate the max salary by player
+  group_by(playerID) %>% 
+  summarize(max_salary = max(salary, na.rm = TRUE)) %>% 
+  # Calculate the average of the max salaries
+  summarize(avg_salary = mean(max_salary))
+
+# Repeat for players who were inducted
+Salaries %>% 
+  semi_join(inducted, by = "playerID") %>% 
+  group_by(playerID) %>% 
+  summarize(max_salary = max(salary, na.rm = TRUE)) %>% 
+  summarize(avg_salary = mean(max_salary, na.rm = TRUE))
+
+Appearances %>% 
+  # Filter Appearances against nominated
+  semi_join(nominated, by = "playerID") %>% 
+  # Find last year played by player
+  group_by(playerID) %>% 
+  summarize(last_year = max(yearID)) %>% 
+  # Join to full HallOfFame
+  left_join(HallOfFame, by = "playerID") %>% 
+  # Filter for unusual observations
+  filter(last_year >= yearID)
 
