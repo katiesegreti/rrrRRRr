@@ -42,3 +42,42 @@ ggplot(data = hsb2, aes(x = science, y = math, color = prog)) +
 # observational: dont directly interfere when collecting data
 # observational:only correlation can be inferred
 # experiment: causation can be inferred
+
+ucb_admission_counts %>%
+  # Group by gender
+  group_by(Gender) %>%
+  # Create new variable
+  mutate(prop = n / sum(n)) %>%
+  # Filter for admitted
+  filter(Admit == "Admitted")
+
+ucb_admission_counts  %>%
+  # Group by department, then gender
+  group_by(Dept, Gender) %>%
+  # Create new variable
+  mutate(prop = n / sum(n)) %>%
+  # Filter for male and admitted
+  filter(Gender == "Male", Admit == "Admitted")
+
+
+library(openintro)
+library(dplyr)
+data(county)
+
+county_noDC <- county %>%
+  filter(state != "District of Columbia") %>%
+  droplevels()
+
+#simple random sample of 150 counties
+county_srs <- county_noDC %>%
+  sample_n(size = 150)
+
+
+county_srs %>% 
+  group_by(state) %>%
+  count()
+
+#stratified sample
+county_str <- county_noDC %>%
+  group_by(state) %>%
+  sample_n(size = 3)
