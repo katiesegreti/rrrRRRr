@@ -1,0 +1,100 @@
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(stringr)
+comics <- read_csv("https://assets.datacamp.com/production/course_1796/datasets/comics.csv")
+
+str(comics)
+
+table(comics$publisher, comics$gender)
+
+table(comics$eye, comics$align)
+
+table(comics$hair, comics$align)
+
+# Create side-by-side barchart of gender by alignment
+ggplot(comics, aes(x = align, fill = gender)) + 
+  geom_bar(position = "dodge")
+
+# Create side-by-side barchart of alignment by gender
+ggplot(comics, aes(x = gender, fill = align)) + 
+  geom_bar(position = "dodge") +
+  theme(axis.text.x = element_text(angle = 90))
+
+options(scipen = 999, digits = 3)
+tab_cnt <- table(comics$id, comics$align)
+prop.table(tab_cnt)
+
+prop.table(tab_cnt, 1)
+prop.table(tab_cnt, 2)
+
+
+ggplot(comics, aes(x = id, fill = align)) +
+  geom_bar(position = "fill") +
+  ylab("proportion")
+
+ggplot(comics, aes(x = align, fill = id)) +
+  geom_bar(position = "fill") +
+  ylab("proportion")
+
+# Plot of gender by align
+ggplot(comics, aes(x = align, fill = gender)) +
+  geom_bar()
+
+
+comicsFiltered <- comics %>%
+  filter(gender != "NA" & gender != "Other") %>%
+  filter(align == "Good" | align == "Bad" | align == "Neutral")
+
+# Change the order of the levels in align
+comicsFiltered$align <- factor(comicsFiltered$align, 
+                               levels = c("Bad", "Neutral", "Good"))
+# Plot proportion of gender, conditional on align
+ggplot(comicsFiltered, aes(x = align, fill = gender)) + 
+  geom_bar(position = "fill") +
+  ylab("proportion") + 
+  scale_fill_manual("legend", values = c("Female" = "magenta", "Male" = "dodgerblue", 
+                                         "Other" = "black"))
+
+comicsFilteredDC <- comicsFiltered %>%
+  filter(publisher == "dc")
+
+comicsFilteredMarvel <- comicsFiltered %>%
+  filter(publisher == "marvel")
+
+#DC chart
+ggplot(comicsFilteredDC, aes(x = gender, fill = align)) + 
+  geom_bar(position = "fill") +
+  ylab("proportion") + 
+  scale_fill_manual("legend", values = c("Bad" = "magenta", "Good" = "dodgerblue", 
+                                         "Neutral" = "darkgrey")) +
+  ggtitle("Alignment by gender: DC comics") 
+
+#Marvel chart
+ggplot(comicsFilteredMarvel, aes(x = gender, fill = align)) + 
+  geom_bar(position = "fill") +
+  ylab("proportion") + 
+  scale_fill_manual("legend", values = c("Bad" = "magenta", "Good" = "dodgerblue", 
+                                         "Neutral" = "darkgrey")) +
+  ggtitle("Alignment by gender: Marvel comics") 
+
+ggplot(comics, aes(x = id)) +
+  geom_bar() +
+  facet_wrap(~align)
+
+glimpse(comics)
+head(comics, n = 30)
+
+comics# Create plot of align
+ggplot(comics, aes(x = align)) + 
+  geom_bar()
+
+
+
+# gender == "other"
+
+comicsNB <- comicsFiltered %>%
+  filter(gender == "Other")
+
+loki <- comicsFiltered %>%
+  filter(str_detect(name, "Loki"))
