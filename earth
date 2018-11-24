@@ -1,0 +1,79 @@
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+
+essential <- read_csv("essential_oils.csv")
+
+#replaces NAs with 0
+for(i in 1:nrow(essential)) {
+  for(j in 1:ncol(essential)) {
+    if(is.na(essential[i,j])) {
+      essential[i,j] <- 0
+    }
+  }
+}
+
+essential$promotes <- ""
+essential$alleviates <- ""
+
+for(i in 1:nrow(essential)) {
+  for(j in 3:49) {
+    if(essential[i,j] == 1) {
+      essential$promotes[i] <- paste(essential$promotes[i], 
+                                     colnames(essential)[j])
+    }
+  }
+}
+essential$promotes <- trimws(essential$promotes)
+
+for(i in 1:nrow(essential)) {
+  for(j in 50:83) {
+    if(essential[i,j] == 1) {
+      essential$alleviates[i] <- paste(essential$alleviates[i], 
+                                       colnames(essential)[j])
+    }
+  }
+}
+essential$alleviates <- trimws(essential$alleviates)
+
+criteria_1 <- quo(fatigue)
+criteria_2 <- quo(stress)
+criteria_3 <- quo(energy)
+criteria_4 <- quo(anxiety)
+criteria_5 <- quo(depression)
+
+
+essential %>%
+  filter(!!criteria_1 == 1 | !!criteria_2 == 1 | 
+           !!criteria_3 == 1 | !!criteria_4 == 1) %>%
+  mutate(criteria_met = !!criteria_1 + !!criteria_2 + 
+           !!criteria_3 + !!criteria_4) %>%
+  select(oil, have_this, criteria_met, promotes, alleviates) %>%
+  arrange(desc(criteria_met))
+
+essential %>%
+  filter(oil == "Tea Tree") %>%
+  select(promotes, alleviates)
+
+oil_details <- function(x) {
+  essential_oil <- x
+  essential %>%
+    filter(oil == essential_oil) %>%
+    select(promotes, alleviates)
+}
+
+oil_details("Eucalyptus")
+
+oil_details_matrix <- function() {}
+
+##moon phases
+library(lunar)
+dates_2018 <- read_csv("dates_2018.csv")
+dates_2018$Date <- as.Date(mdy(dates_2018$Date))
+
+dates_2018$sphases <- lunar.phase(dates_2018$Date)
+
+dates_2018$phases <- lunar.phase(dates_2018$Date, name = 8)
+dates_2018$illumination <- lunar.illumination(dates_2018$Date)
+
