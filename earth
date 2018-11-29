@@ -63,7 +63,7 @@ oil_details <- function(x) {
     select(promotes, alleviates)
 }
 
-oil_details("Eucalyptus")
+oil_details("Basil")
 
 oil_details_matrix <- function() {}
 
@@ -76,4 +76,90 @@ dates_2018$sphases <- lunar.phase(dates_2018$Date)
 
 dates_2018$phases <- lunar.phase(dates_2018$Date, name = 8)
 dates_2018$illumination <- lunar.illumination(dates_2018$Date)
+options(scipen=999)
+
+
+full_moons <- dates_2018 %>%
+  filter(phases == "Full" & illumination > lag(illumination) & illumination > lead(illumination)) %>%
+  select(Date)
+
+moon_dates_2018 <- dates_2018 %>%
+  mutate(full = ifelse(phases == "Full" & illumination > lag(illumination) & 
+                         illumination > lead(illumination), 1, 0),
+         new = ifelse(phases == "New" & illumination < lag(illumination) &
+                        illumination < lead(illumination), 1, 0))
+moon_dates_2018$month <- month(moon_dates_2018$Date)
+moon_dates_2018$month <- factor(moon_dates_2018$month)
+#total full and new moons in 2018
+moon_dates_2018 %>%
+  summarize(total_full = sum(full), total_new = sum(new))
+
+#total full and new moons by month
+month_labels <- c("Jan", "Feb", "March", "April", "May", "June",
+                  "July", "Aug", "Sept", "Oct", "Nov", "Dec")
+
+this_theme2 <- theme(panel.background = element_rect(fill = "black"),
+                     plot.background = element_rect(fill = "black"),
+                     plot.title = element_text(size = 26, color = "MediumOrchid"),
+                     axis.text = element_text(color = "MediumOrchid"),
+                     axis.ticks = element_line(color = "MediumOrchid"),
+                     axis.line.x =  element_line(color = "MediumOrchid"),
+                     axis.line.y =  element_line(color = "MediumOrchid"),
+                     legend.position = "none")
+
+moon_dates_2018 %>%
+  group_by(month) %>%
+  summarize(total_full = sum(full), total_new = sum(new)) %>%
+  ggplot(aes(x = month, y = total_full)) +
+  geom_col(fill = "ivory") +
+  scale_x_discrete(labels = month_labels) +
+  scale_y_continuous(breaks = c(1,2)) +
+  xlab("") +
+  ylab("") +
+  ggtitle("Number Of Full Moons By Month In 2018") +
+  this_theme2
+
+
+moon_dates_2018 %>%
+  filter(month == 2) %>%
+  ggplot(aes(x = Date, y = illumination, fill = phases)) +
+  geom_col()
+
+###2019
+dates_2019 <- seq(as.Date("2019/1/1"), as.Date("2019/12/31"), by = "day")
+sphases_2019 <- lunar.phase(dates_2019)
+phases_2019 <- lunar.phase(dates_2019, name = 8)
+illumination_2019 <- lunar.illumination(dates_2019)
+
+moon_dates_2019 <- data.frame(dates_2019, sphases_2019, phases_2019, illumination_2019)
+colnames(moon_dates_2019) <- c("Date", "sphases", "phases", "illumination")
+
+moon_dates_2019 <- moon_dates_2019 %>%
+  mutate(full = ifelse(phases == "Full" & illumination > lag(illumination) & 
+                         illumination > lead(illumination), 1, 0),
+         new = ifelse(phases == "New" & illumination < lag(illumination) &
+                        illumination < lead(illumination), 1, 0))
+moon_dates_2019$month <- month(moon_dates_2019$Date)
+moon_dates_2019$month <- factor(moon_dates_2019$month)
+
+moon_dates_2019 %>%
+  group_by(month) %>%
+  summarize(total_full = sum(full), total_new = sum(new)) %>%
+  ggplot(aes(x = month, y = total_full)) +
+  geom_col(fill = "ivory") +
+  scale_x_discrete(labels = month_labels) +
+  scale_y_continuous(breaks = c(1,2)) +
+  xlab("") +
+  ylab("") +
+  ggtitle("Number Of Full Moons By Month In 2019") +
+  this_theme2
+
+full_moons_2019 <- moon_dates_2019 %>%
+  filter(full == 1) %>%
+  select(Date)
+
+new_moons_2019 <- moon_dates_2019 %>%
+  filter(new == 1) %>%
+  select(Date)
+
 
