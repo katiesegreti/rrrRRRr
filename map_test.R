@@ -1,7 +1,7 @@
 library(ggmap)
 corvallis <- c(lon = -123.2620, lat = 44.5646)
 
-key <- "AIzaSyAEJYmlp-jKgR1SQGuv-lbcZMYNuJ9Xh5g"
+key <- ""
 
 register_google(key = key)
 
