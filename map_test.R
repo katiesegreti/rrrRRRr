@@ -26,23 +26,11 @@ has_goog_signature()
 corvallis_map_bw <- get_map(corvallis, zoom = 13, source = "stamen", maptype = "toner")
 
 
-##googleway
-library(googleway)
-set_key("AIzaSyAEJYmlp-jKgR1SQGuv-lbcZMYNuJ9Xh5g")
 
-lat <- c(4,41) 
-lon <- c(68,99) 
-center = c(mean(lat), mean(lon))
-
-google_map(location = center, zoom = 6)
-
-
-lynbrook <- c(40.6548, -73.6718)
-google_map(location = lynbrook, zoom = 15)
 
 
 if(!requireNamespace("devtools")) install.packages("devtools")
 devtools::install_github("dkahle/ggmap", ref = "tidyup")
 ggmap(get_googlemap())
-register_google(key = "AIzaSyAEJYmlp-jKgR1SQGuv-lbcZMYNuJ9Xh5g")
+register_google(key = "")
 geocode("waco texas")
