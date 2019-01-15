@@ -302,23 +302,23 @@ summary(fdata)
 
 # Examine the data: generate the summaries for the groups large and small:
 fdata %>% 
-    group_by(label) %>%     # group by small/large purchases
-    summarize(min  = min(y),   # min of y
-              mean = mean(y),   # mean of y
-              max  = max(y))   # max of y
+  group_by(label) %>%     # group by small/large purchases
+  summarize(min  = min(y),   # min of y
+            mean = mean(y),   # mean of y
+            max  = max(y))   # max of y
 
 # Fill in the blanks to add error columns
 fdata2 <- fdata %>% 
-         group_by(label) %>%       # group by label
-           mutate(residual = pred - y,  # Residual
-                  relerr   = residual / y)  # Relative error
+  group_by(label) %>%       # group by label
+  mutate(residual = pred - y,  # Residual
+         relerr   = residual / y)  # Relative error
 
 # Compare the rmse and rmse.rel of the large and small groups:  sqrt(mean(res^2))
 fdata2 %>% 
   group_by(label) %>% 
   summarize(rmse     = sqrt(mean(residual^2)),   # RMSE
             rmse.rel = sqrt(mean(relerr^2)))   # Root mean squared relative error
-            
+
 # Plot the predictions for both groups of purchases
 ggplot(fdata2, aes(x = pred, y = y, color = label)) + 
   geom_point() + 
@@ -385,13 +385,13 @@ model_lin <- lm(price ~ size, data = houseprice)
 
 # Make predictions and compare
 houseprice %>% 
-    mutate(pred_lin = predict(model_lin, houseprice),       # predictions from linear model
-           pred_sqr = predict(model_sqr, houseprice)) %>%   # predictions from quadratic model 
-    gather(key = modeltype, value = pred, pred_lin, pred_sqr) %>% # gather the predictions
-    ggplot(aes(x = size)) + 
-       geom_point(aes(y = price)) +                   # actual prices
-       geom_line(aes(y = pred, color = modeltype)) + # the predictions
-       scale_color_brewer(palette = "Dark2")
+  mutate(pred_lin = predict(model_lin, houseprice),       # predictions from linear model
+         pred_sqr = predict(model_sqr, houseprice)) %>%   # predictions from quadratic model 
+  gather(key = modeltype, value = pred, pred_lin, pred_sqr) %>% # gather the predictions
+  ggplot(aes(x = size)) + 
+  geom_point(aes(y = price)) +                   # actual prices
+  geom_line(aes(y = pred, color = modeltype)) + # the predictions
+  scale_color_brewer(palette = "Dark2")
 
 # Create a splitting plan for 3-fold cross validation
 set.seed(34245)  # set the seed for reproducibility
@@ -423,3 +423,90 @@ houseprice_long %>%
   group_by(modeltype) %>% # group by modeltype
   summarize(rmse = sqrt(mean(residuals^2)))
 
+##LOGISTIC REGRESSION
+sparrow <- readRDS("~/datacamp_R/supervised_learning/sparrow.rds")
+# sparrow is in the workspace
+summary(sparrow)
+
+# Create the survived column
+sparrow$survived <- sparrow$status == "Survived"
+
+# Create the formula
+(fmla <- survived ~ total_length + weight + humerus)
+
+# Fit the logistic regression model
+sparrow_model <- glm(fmla, data = sparrow, family = "binomial")
+
+# Call summary
+summary(sparrow_model)
+
+# Call glance
+(perf <- glance(sparrow_model))
+
+# Calculate pseudo-R-squared
+(pseudoR2 <- 1 - (perf$deviance / perf$null.deviance))
+
+# Make predictions
+sparrow$pred <- predict(sparrow_model, sparrow, type = "response")
+
+# Look at gain curve
+GainCurvePlot(sparrow, "pred", "survived", "sparrow survival model")
+
+# bikesJuly is in the workspace
+str(bikesJuly)
+
+# The outcome column
+outcome 
+
+# The inputs to use
+vars 
+
+# Create the formula string for bikes rented as a function of the inputs
+(fmla <- paste(outcome, "~", paste(vars, collapse = " + ")))
+
+# Calculate the mean and variance of the outcome
+(mean_bikes <- mean(bikesJuly$cnt))
+(var_bikes <- var(bikesJuly$cnt))
+
+# Fit the model
+bike_model <- glm(fmla, data = bikesJuly, family = "quasipoisson")
+
+# Call glance
+(perf <- glance(bike_model))
+
+# Calculate pseudo-R-squared
+(pseudoR2 <- 1 - perf$deviance / perf$null.deviance)
+
+# bikesAugust is in the workspace
+str(bikesAugust)
+
+# bike_model is in the workspace
+summary(bike_model)
+
+# Make predictions on August data
+bikesAugust$pred  <- predict(bike_model, newdata = bikesAugust, type = "response")
+
+# Calculate the RMSE
+bikesAugust %>% 
+  mutate(residual = pred - cnt) %>%
+  summarize(rmse  = sqrt(mean(residual^2)))
+
+# Plot predictions vs cnt (pred on x-axis)
+ggplot(bikesAugust, aes(x = pred, y = cnt)) +
+  geom_point() + 
+  geom_abline(color = "darkblue")
+
+# Plot predictions and cnt by date/time
+bikesAugust %>% 
+  # set start to 0, convert unit to days
+  mutate(instant = (instant - min(instant))/24) %>%  
+  # gather cnt and pred into a value column
+  gather(key = valuetype, value = value, cnt, pred) %>%
+  filter(instant < 14) %>% # restric to first 14 days
+  # plot value by instant
+  ggplot(aes(x = instant, y = value, color = valuetype, linetype = valuetype)) + 
+  geom_point() + 
+  geom_line() + 
+  scale_x_continuous("Day", breaks = 0:14, labels = 0:14) + 
+  scale_color_brewer(palette = "Dark2") + 
+  ggtitle("Predicted August bike rentals, Quasipoisson model")
