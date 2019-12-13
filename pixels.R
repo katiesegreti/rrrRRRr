@@ -13,7 +13,7 @@ pix_theme <- theme(panel.grid = element_blank(),
 x <- rep(-7:7, each = 13)
 y <- rep(0:12, times = 15)
 c <- rep(0, 195)
-df <- data.frame(x, y, c)
+heart <- data.frame(x, y, c)
 
 ones_1 <- 1
 zeroes_1 <- 7
@@ -22,13 +22,13 @@ zeroes_2a <- 2
 zeroes_2b <- 1
 for(i in 1:11) {
   if (i < 10) {
-    df$c[y == i] <- c(rep(0, zeroes_1), 
+    heart$c[y == i] <- c(rep(0, zeroes_1), 
                     rep(1, ones_1), rep(0, zeroes_1))
     if(ones_1 < 13) {ones_1 <- ones_1 + 2}
     if(zeroes_1 > 1) {zeroes_1 <- zeroes_1 - 1}
     }
   if(i >= 10) {
-    df$c[y == i] <- c(rep(0, zeroes_2a), rep(1, ones_2),
+    heart$c[y == i] <- c(rep(0, zeroes_2a), rep(1, ones_2),
                       rep(0, zeroes_2b), rep(1, ones_2),
                       rep(0, zeroes_2a))
     ones_2 <- ones_2 - 2
@@ -265,3 +265,113 @@ leaf1$c[y == 23] <- c(0, 0, 0, 0, 1, 1, 1, rep(0, 6), 1, rep(2, 5), 1, 1, rep(0,
 leaf1$c[y == 24] <- c(0, 0, 0, 0, 1, 1, rep(0, 7), rep(1, 5), 2, 1, 1, rep(0, 6))
 leaf1$c[y == 25] <- c(rep(0, 13), 1, 1, 0, 0, 1, 1, 1, 1, rep(0, 6))
 leaf1$c[y == 26] <- c(rep(0, 19), 1, 1, rep(0, 6))
+
+
+#menorah
+x <- rep(1:17, each = 17)
+y <- rep(1:17, times = 17)
+c <- rep(0, 289)
+menorah <- data.frame(x, y, c)
+
+menorah$c[y == 1] <- c(0, 1, rep(2, 13), 1, 0)
+menorah$c[y == 2] <- c(0, rep(1, 7), 2, rep(1, 7), 0)
+menorah$c[y == 3] <- c(0, rep(1, 7), 2, rep(1, 7), 0)
+for(i in 4:7) {
+  menorah$c[y == i] <- c(rep(0, 6), 1, 1, 2, 1, 1, rep(0, 6))
+}
+menorah$c[y == 8] <- c(rep(2, 17))
+menorah$c[y == 9] <- c(2, rep(1, 7), 2, rep(1, 7), 2)
+menorah$c[y == 10] <- c(2, 1, rep(2, 13), 1, 2)
+menorah$c[y == 11] <- c(2, 1, 2, rep(1, 5), 2, rep(1, 5), 2, 1, 2)
+menorah$c[y == 12] <- c(2, 1, 2, 1, rep(2, 9), 1, 2, 1, 2)
+menorah$c[y == 13] <- c(2, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2 ,1 ,2)
+menorah$c[y == 14] <- c(2, 1, 2, 1, 2, 1, rep(2, 5), 1, 2, 1, 2, 1, 2)
+menorah$c[y == 15] <- c(2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2)
+menorah$c[y == 16] <- c(3, 1, 3, 1, 0, 1, 0, 1, 2, 1, 0, 1, 0, 1, 0, 1, 0)
+menorah$c[y == 17] <- c(rep(0, 8), 3, rep(0, 8))
+
+menorah %>%
+  filter(c > 0) %>%
+  ggplot(aes(x, y, fill = factor(c))) +
+  geom_point(size = 13, shape = 22) +
+  scale_fill_manual(values = c("#ff9224", "#2491ff", "yellow")) +
+  pix_theme +
+  xlim(1, 17) +
+  ylim(1, 17)
+
+
+#mixtape madness
+x <- rep(1:17, each = 11)
+y <- rep(1:11, times = 17)
+c <- rep(0, 187)
+mixtape <- data.frame(x, y, c)
+
+mixtape <- mixtape %>%
+  mutate(c = case_when(x %in% c(1, 17) | y %in% c(1, 11) |
+                         (x %in% c(6:12) & y == 2) |
+                         (x %in% c(5:13) & y %in% c(5, 8)) |
+                         (x %in% c(4, 7, 11, 14) & y %in% c(6, 7)) |
+                         (x %in% c(7:11) & y == 7) ~ 1,
+                        (x %in% c(5, 6, 12, 13) & y %in% c(6, 7)) |
+                         (x %in% c(8:10) & y == 6) ~ 0,
+                       (x %in% c(2:4, 14:16) & y == 5) ~ 2,
+                       (x %in% c(2:3, 15:16) & y == 6) ~ 3,
+                       (x %in% c(2:3, 15:16) & y == 7) ~ 4,
+                       (x %in% c(2:4, 14:16) & y == 8) ~ 5,
+                       TRUE ~ 6))
+
+mixtape %>%
+  ggplot(aes(x = x, y = y, fill = as.factor(c))) +
+  geom_point(size = 17, shape = 22) +
+  scale_fill_manual(values = c("grey", "black", "green", "magenta", "yellow",
+                               "purple", "cyan")) +
+  pix_theme +
+  xlim(0, 18) +
+  ylim(-1, 13)
+
+#mets
+# 0: white, 1: orange, 2: blue
+x <- rep(0:25, each = 31)
+y <- rep(0:30, times = 26)
+c <- rep(0, 806)
+mets <- data.frame(x, y, c)
+
+mets$c[y==0] <- c(rep(0, 9), rep(1, 8), rep(0, 9))
+mets$c[y==1] <- c(rep(0, 9), 1, rep(2, 6), 1, rep(0, 9))
+mets$c[y==2] <- c(rep(0, 9), 1, 2, 1, 2, 2, 1, 2, 1, rep(0, 9))
+mets$c[y==3] <- c(rep(0, 9), 1, 1, 1, 2, 2, 1, 1, 1, rep(0, 9))
+mets$c[y==4] <- c(rep(0, 11), 1, 2, 2, 1, rep(0, 11))
+mets$c[y==5] <- c(rep(0, 4), rep(1, 4), rep(0, 3), 1, 2, 2, 1, rep(0, 3), rep(1, 4), rep(0, 4))
+mets$c[y==6] <- c(0, 0, 1, 1, rep(2, 4), 1, 1, 0, 1, 2, 2, 1, 0, 1, 1, rep(2, 4), 1, 1, 0, 0)
+mets$c[y==7] <- c(0, 0, 1, rep(2, 6), 1, 0, 1, 2, 2, 1, 0, 1, rep(2, 6), 1, 0, 0)
+mets$c[y==8] <- c(0, 0, 1, 2, 1, 2, 2, 1, 2, 1, 0, 1, 2, 2, 1, 0, 1, 2, 1, 2, 2, 1, 2, 1, 0, 0)
+mets$c[y==9] <- c(0, 0, 1, 1, 1, 2, 2, 1, 1, 1, 0, 1, 2, 2, 1, 0, 1, 1, 1, 2, 2, 1, 1, 1, 0, 0)
+mets$c[y==10] <- c(rep(0, 4), 1, 2, 2, 1, 0, 0, 0, 1, 2, 2, 1, 0, 0, 0, 1, 2, 2, 1, rep(0,4))
+mets$c[y==11] <- c(rep(0, 4), 1, 2, 2, 1, 0, 0, 0, 1, 2, 2, 1, 0, 0, 1, 2, 2, 2, 1, rep(0,4))
+mets$c[y==12] <- c(rep(0, 4), 1, 2, 2, 1, 0, 0, 0, 1, 2, 2, 1, 0, 1, 2, 2, 2, 2, 1, rep(0,4))
+mets$c[y==13] <- c(rep(0, 4), 1, 2, 2, 1, 0, 0, 1, 2, 2, 2, 1, 1, 2, 2, 2, 2, 2, 1, rep(0,4))
+mets$c[y==14] <- c(rep(0, 4), 1, 2, 2, 1, 0, 1, rep(2, 11), 1, rep(0, 4))
+mets$c[y==15] <- c(1, 1, 0, 0, 1, 2, 2, 1, 0, 1, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 1, 0, 1, 1, 0)
+mets$c[y==16] <- c(1, 2, 1, 0, 1, 2, 2, 1, 1, 2, 2, 2, 1, 1, 2, 2, 2, 1, 1, 2, 2, 1, 0, 1, 2, 1)
+mets$c[y==17] <- c(1, 2, 2, 1, 1, 2, 2, 1, 2, 2, 2, 1, 1, rep(2, 5), 1, 2, 2, 1, 1, 2, 2, 1)
+mets$c[y==18] <- c(1, rep(2, 10), 1, rep(2, 6), 1, rep(2, 6), 1)
+mets$c[y==19] <- c(1, rep(2, 9), 1, 1, 2, 2, 2, 1, 1, rep(2, 8), 1)
+mets$c[y==20] <- c(0, 1, rep(2, 8), 1, 2, 2, 2, rep(1, 4), rep(2, 6), 1, 0)
+mets$c[y==21] <- c(0, 0, 1, rep(2, 6), 1, 2, 2, 2, 1, 1, 0, 0, 1, rep(2, 5), 1, 1, 0)
+mets$c[y==22] <- c(0, 0, 0, 1, 1, 2, 2, 1, 1, 2, 2, 2, 1, 1, rep(0, 4), 1, 2, 2, 1, 1, 1, 0, 0)
+mets$c[y==23] <- c(rep(0, 4), 1, 2, 2, 1, 2, 2, 2, 1, 1, rep(0, 5), 1, 2, 2, 1, rep(0,4))
+mets$c[y==24] <- c(rep(0, 4), 1, rep(2, 5), 1, 1, rep(0, 6), 1, 2, 2, 1, rep(0,4))
+mets$c[y==25] <- c(rep(0, 4), 1, rep(2, 4), 1, 1, rep(0, 7), 1, 2, 2, 1, rep(0, 4))
+mets$c[y==26] <- c(rep(0, 4), 1, 2, 2, 2, 1, 1, rep(0, 8), 1, 2, 2, 1, rep(0,4))
+mets$c[y==27] <- c(0, 0, 1, 1, 1, 2, 2, 1, 1, 1, rep(0, 6), 1, 1, 1, 2, 2, 1, 1, 1, 0, 0)
+mets$c[y==28] <- c(0, 0, 1, 2, 1, 2, 2, 1, 2, 1, rep(0, 6), 1, 2, 1, 2, 2, 1, 2, 1, 0, 0)
+mets$c[y==29] <- c(0, 0, 1, rep(2, 6), 1, rep(0, 6), 1, rep(2, 6), 1, 0, 0)
+mets$c[y==30] <- c(0, 0, rep(1, 8), rep(0, 6), rep(1, 8), 0, 0)
+
+mets %>%
+  ggplot(aes(x = x, y = y, fill = as.factor(c))) +
+  geom_point(size = 17, shape = 22) +
+  scale_fill_manual(values = c("white", "orange", "blue")) +
+  pix_theme +
+  xlim(0, 25) +
+  ylim(0, 30)
